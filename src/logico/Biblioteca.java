@@ -63,11 +63,11 @@ public class Biblioteca {
 		return null;
 	}
 	
-	public ArrayList<Publicacion> documentosPrestadosClientePorCodigo(String codcliente) {
-		ArrayList<Publicacion> p = new ArrayList<Publicacion>();
+	public ArrayList<Prestamo> prestamosCodigoCliente(String codcliente) {
+		ArrayList<Prestamo> p = new ArrayList<Prestamo>();
 		for(Prestamo e : misPrestamos) {
 			if(e.getMiCliente().getCodigo().equalsIgnoreCase(codcliente)) {
-				p.add(e.getMiPublicacion());
+				p.add(e);
 			}
 		}
 		return p;
@@ -88,36 +88,41 @@ public class Biblioteca {
 		Cliente cliente = buscarClientePorCodigo(codCliente);
 		Publicacion publicacion = buscarPublicacionPorCodigo(codDocumento);
 		
-		if(cliente.getCantPrestamos() < 5) {
-			Prestamo nuevo = new Prestamo(cliente, publicacion, EstadoPrestamo.PRESTADO, LocalDate.now(), devol);
-			agregarPrestamo(nuevo);
-			cliente.aumentarPrestamosActivos();
-			realizar = true;
+		if(cliente != null && publicacion != null) {
+			if(cliente.getCantPrestamos() < 5 && publicacion.ejemplaresDisponibles()) {
+				Prestamo nuevo = new Prestamo(cliente, publicacion, devol);
+				agregarPrestamo(nuevo);
+				cliente.aumentarPrestamosActivos();
+				publicacion.prestamoRealizado();
+				realizar = true;
+			}
 		}
-		
 		return realizar;
 	}
 	
 	public boolean devolverDocumento(String codCliente, String codDocumento) {
 		boolean devolver = false;
 		Prestamo prestamo = buscarPrestamoPorClienteDoc(codCliente, codDocumento);
-		if(prestamo != null && prestamo.getMiEstado() != EstadoPrestamo.DEVUELTO) {
-			prestamo.setMiEstado(EstadoPrestamo.DEVUELTO);
-			prestamo.getMiCliente().disminuirPrestamosActivos();
-			devolver = true;
+		if(prestamo != null) {
+			if(prestamo.getMiEstado() != EstadoPrestamo.DEVUELTO) {
+				prestamo.setMiEstado(EstadoPrestamo.DEVUELTO);
+				prestamo.getMiCliente().disminuirPrestamosActivos();
+				prestamo.getMiPublicacion().prestamoEntregado();
+				devolver = true;
+			}
 		}
 		return devolver;
 	}
 	
 	public int[] cantTipoDocPretadoCliente(String codcliente) {
 		int[] cant = new int[3];
-		ArrayList<Publicacion> libros = documentosPrestadosClientePorCodigo(codcliente);
-		for(Publicacion e : libros) {
-			if(e instanceof Libro)   
+		ArrayList<Prestamo> prestamos = prestamosCodigoCliente(codcliente);
+		for(Prestamo e : prestamos) {
+			if(e.getMiPublicacion() instanceof Libro)   
 				cant[0] += 1;
-			if(e instanceof Revista) 
+			if(e.getMiPublicacion() instanceof Revista) 
 				cant[1] += 1;
-			if(e instanceof Articulo)
+			if(e.getMiPublicacion() instanceof Articulo)
 				cant[2] += 1;
 		}
 		return cant;

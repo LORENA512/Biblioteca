@@ -13,6 +13,17 @@ public class Publicacion {
 		this.cantEjemplares = cantEjemplares;
 	}
 	
+	public void prestamoRealizado() {
+		cantEjemplares -= 1;
+		if(cantEjemplares < 0) {
+			cantEjemplares = 0;
+		}
+	}
+	
+	public void prestamoEntregado() {
+		cantEjemplares += 1;
+	}
+	
 	protected boolean ejemplaresDisponibles() {
 		return cantEjemplares > 0;
 	}

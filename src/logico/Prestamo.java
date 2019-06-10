@@ -16,12 +16,11 @@ public class Prestamo {
 	private LocalDate solicitud;
 	private LocalDate devolucion;
 	
-	public Prestamo(Cliente miCliente, Publicacion miPublicacion, EstadoPrestamo miEstado, LocalDate solicitud,
-			LocalDate devolucion) {
+	public Prestamo(Cliente miCliente, Publicacion miPublicacion, LocalDate devolucion) {
 		this.miCliente = miCliente;
 		this.miPublicacion = miPublicacion;
-		this.miEstado = miEstado;
-		this.solicitud = solicitud;
+		this.miEstado = EstadoPrestamo.PRESTADO;
+		this.solicitud = LocalDate.now();
 		this.devolucion = devolucion;
 	}
 
